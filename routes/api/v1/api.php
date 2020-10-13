@@ -19,10 +19,8 @@ use Illuminate\Support\Facades\Route;
 }); */
 
 
-Route::group(['prefix' => '/', 'namespace' => 'v1'], function () {
+Route::group(['prefix' => '/auth', 'namespace' => 'App\Http\Controllers\api\v1'], function () {
 
-    /* Route::post('login', 'api\v1\AuthController@login');
-    Route::post('signup', 'api\v1\AuthController@signup'); */
     Route::post('login', 'AuthController@login');
     Route::post('signup', 'AuthController@register');
   

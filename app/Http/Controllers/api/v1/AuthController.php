@@ -64,16 +64,25 @@ class AuthController extends Controller
 
         //Genereate the token and save into DB
         $user = $request->user();
-        $tokenResult = $user->createToken('AspireAPIAccessToken');
+        
+        /* $tokenResult = $user->createToken('AspireAPIAccessToken');
         $token = $tokenResult->token;
-
-        //Check rememberme
         if ($request->remember_me)
             $token->expires_at = Carbon::now()->addWeeks(1);
+        $token->save();
+        return response()->json([
+            'access_token' => $tokenResult->accessToken,
+            'token_type' => 'Bearer',
+            'expires_at' => Carbon::parse(
+                $tokenResult->token->expires_at
+            )->toDateTimeString()
+        ]); */
 
-        $token->save(); 
+        if (request()->remember_me === 'true')
+            Passport::personalAccessTokensExpireIn(now()->addDays(15));
 
-        return $this->token($token);
+        $tokenResult = $user->createToken('AspireAPIAccessToken');
+        return $this->token($tokenResult);
     }
 
     /**
@@ -94,6 +103,7 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        // return response()->json($request->user());
+        return $this->success(Auth::user());
     }
 }

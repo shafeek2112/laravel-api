@@ -15,7 +15,7 @@ trait ApiResponser{
 		$tokenData = [
 			'access_token' => $personalAccessToken->accessToken,
             'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString()
+			'expires_at' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString(),
 		];
 
 		return $this->success($tokenData, $message, $code);
