@@ -20,7 +20,7 @@ class LoanApplicationController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return JSON Repsonse
      */
     public function index(): String    {
         
@@ -32,7 +32,7 @@ class LoanApplicationController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return JSON Repsonse
      */
     public function store(Request $request)
     {
@@ -47,19 +47,20 @@ class LoanApplicationController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  string  $loanApplicationNo
+     * @return JSON Repsonse
      */
-    public function show($id)
+    public function show($loanApplicationNo)
     {
-        //
+        $loanApplications = $this->loanApplicationService->findApplicationNo($loanApplicationNo); 
+        return $loanApplications;
     }
 
     /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return JSON Repsonse
      */
     public function edit($id)
     {
