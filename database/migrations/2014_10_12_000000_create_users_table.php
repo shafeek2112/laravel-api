@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\UserIsAdmin;
 
 class CreateUsersTable extends Migration
 {
@@ -19,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('is_admin', 1)->default(UserIsAdmin::USER_IS_NOT_ADMIN);
             $table->rememberToken();
             $table->timestamps();
         });

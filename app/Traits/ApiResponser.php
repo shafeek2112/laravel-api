@@ -1,7 +1,7 @@
 <?php
 
 /* 
-For consistance data return via API, we are using this Traits.
+*	For consistance data return via API, we are using this Traits.
 */
 
 namespace App\Traits;
@@ -15,7 +15,6 @@ trait ApiResponser{
 		$tokenData = [
 			'access_token' => $personalAccessToken->accessToken,
             'token_type' => 'Bearer',
-			// 'expires_at' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString(),
 			'expires_at' => Carbon::now()->addDays(1)->toDateTimeString(),
 		];
 

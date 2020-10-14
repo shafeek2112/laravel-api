@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Passport\Passport;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Config; 
 
 class AuthController extends Controller
 {
@@ -31,13 +31,13 @@ class AuthController extends Controller
             'password' => 'required|string|confirmed'
         ]);
         $user = new User([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => bcrypt($request->password),
         ]);
         $user->save();
 
-        return $this->success('User Created Successfully', 201);
+        return $this->success('','User Created Successfully', 201);
     }
 
     /**
@@ -65,23 +65,10 @@ class AuthController extends Controller
         //Genereate the token and save into DB
         $user = $request->user();
         
-        /* $tokenResult = $user->createToken('AspireAPIAccessToken');
-        $token = $tokenResult->token;
-        if ($request->remember_me)
-            $token->expires_at = Carbon::now()->addWeeks(1);
-        $token->save();
-        return response()->json([
-            'access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse(
-                $tokenResult->token->expires_at
-            )->toDateTimeString()
-        ]); */
-
         if (request()->remember_me === 'true')
             Passport::personalAccessTokensExpireIn(now()->addDays(15));
 
-        $tokenResult = $user->createToken('AspireAPIAccessToken');
+        $tokenResult = $user->createToken(Config::get('constants.ADMIN_NAME'));
         return $this->token($tokenResult,'Successfully Logged In');
     }
 
