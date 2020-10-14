@@ -82,7 +82,7 @@ class AuthController extends Controller
             Passport::personalAccessTokensExpireIn(now()->addDays(15));
 
         $tokenResult = $user->createToken('AspireAPIAccessToken');
-        return $this->token($tokenResult);
+        return $this->token($tokenResult,'Successfully Logged In');
     }
 
     /**
@@ -93,7 +93,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->token()->revoke();
-        return $this->success('User Logged Out', 200);
+        return $this->success('','User Logged Out');
     }
 
     /**

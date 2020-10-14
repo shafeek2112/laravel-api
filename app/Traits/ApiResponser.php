@@ -15,7 +15,8 @@ trait ApiResponser{
 		$tokenData = [
 			'access_token' => $personalAccessToken->accessToken,
             'token_type' => 'Bearer',
-			'expires_at' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString(),
+			// 'expires_at' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString(),
+			'expires_at' => Carbon::now()->addDays(1)->toDateTimeString(),
 		];
 
 		return $this->success($tokenData, $message, $code);
@@ -24,10 +25,11 @@ trait ApiResponser{
     protected function success($data, $message = null, $code = 200)
 	{
 		return response()->json([
-			'status'=> 'Success', 
-			'message' => $message, 
-			'data' => $data
-		], $code);
+			'status'	=> 'Success', 
+			'message' 	=> $message, 
+			'data' 		=> $data,
+			'code'		=> $code
+		]);
 	}
 
 	protected function error($message = null, $code)
@@ -35,8 +37,9 @@ trait ApiResponser{
 		return response()->json([
 			'status'=>'Error',
 			'message' => $message,
-			'data' => null
-		], $code);
+			'data' => null,
+			'code'		=> $code
+		]);
 	}
 
 }
