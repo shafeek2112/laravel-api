@@ -17,4 +17,12 @@ abstract class LoanStatus extends Enum
     const NO_OUTSTANDING_PAYMENT = 'NO';
     const PAYMENT_FAILED = 'PF';
     const OVER_DUE = 'OD';
+
+    const REPAYMENT_FREQUENCY_WEEKLY = 'weekly';
+    const REPAYMENT_FREQUENCY_MONTHLY = 'monthly';
+    const REPAYMENT_FREQUENCY_YEARLY = 'yearly';
+
+    const LOAN_TERM_SHORT = '12Months';
+    const LOAN_TERM_MEDIUM  = '36Months';
+    const LOAN_TERM_LONG = '64Months'; 
 }

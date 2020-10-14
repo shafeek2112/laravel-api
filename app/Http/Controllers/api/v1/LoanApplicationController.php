@@ -22,20 +22,10 @@ class LoanApplicationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(): String
-    {
+    public function index(): String    {
+        
         $loanApplications = $this->loanApplicationService->all();
-        return $this->success($loanApplications,'User Created Successfully', 200);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return $this->success($loanApplications,'Successfully Fetched Loans', 200);
     }
 
     /**
@@ -46,7 +36,12 @@ class LoanApplicationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $loanApplications = $this->loanApplicationService->store($request);  
+
+        if(!empty($loanApplications['error'])) 
+            return $this->error($loanApplications,401);
+
+        return $this->success($loanApplications,'Successfully Added Loan', 200);
     }
 
     /**
