@@ -4,16 +4,19 @@ namespace App\Http\Controllers\api\v1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Passport\Passport;
-use Illuminate\Support\Facades\Config; 
-use App\Enums\UserStatus;
+use App\Services\AuthService;
 
 class AuthController extends Controller
 {
     use ApiResponser;
+    protected $authService;
+
+    public function __construct()
+    {
+        $this->authService = new AuthService();
+    }
 
     /**
     * Create user
@@ -26,19 +29,12 @@ class AuthController extends Controller
     */
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|confirmed'
-        ]);
-        $user = new User([
-            'name'      => $request->name,
-            'email'     => $request->email,
-            'password'  => bcrypt($request->password),
-        ]);
-        $user->save();
+        $register = $this->authService->register($request);  
 
-        return $this->success('','User Created Successfully', 201);
+        if(!empty($register['error'])) 
+            return $this->error($register,401);
+
+        return $this->success($register,'User Successfully Registered', 200);
     }
 
     /**
@@ -53,17 +49,15 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $attr = $request->validate([
+        /* $attr = $request->validate([
             'email'         => 'required|string|email',
             'password'      => 'required|string',
             'remember_me'   => 'boolean'
         ]);
 
-        if (!Auth::attempt($attr)) {
+        if (!Auth::attempt($attr))
             return $this->error('Credentials mismatch', 401);
-        }
 
-        //Genereate the token and save into DB
         $user = $request->user();
         
         if($user['status'] === UserStatus::REJECTED)
@@ -75,8 +69,16 @@ class AuthController extends Controller
         if (request()->remember_me === 'true')
             Passport::personalAccessTokensExpireIn(now()->addDays(15));
 
+        //Genereate the token and save into DB
         $tokenResult = $user->createToken(Config::get('constants.ADMIN_NAME'));
-        return $this->token($tokenResult,'Successfully Logged In');
+        return $this->token($tokenResult,'Successfully Logged In'); */
+
+
+        $login = $this->authService->login($request);  
+        if(gettype($login) === 'array' && !empty($login['error'])) 
+            return $this->error($login,401);
+
+        return $this->success($login,'Successfully Logged In Registered', 200);
     }
 
     /**
@@ -86,7 +88,10 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->token()->revoke();
+        $logout = $this->authService->logout($request);  
+        if(gettype($logout) === 'array' && !empty($login['error'])) 
+            return $this->error($logout,401);
+        
         return $this->success('','User Logged Out');
     }
 
@@ -97,7 +102,6 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        // return response()->json($request->user());
         return $this->success(Auth::user());
     }
 }
