@@ -8,10 +8,10 @@ namespace App\Enums;
 */
 abstract class LoanStatus extends Enum
 {
-    const APPROVED = 'A';
-    const PENDING = 'P';
-    const REJECTED = 'R';
-    const NEED_ADDITIONAL_INFO = 'N';
+    const APPROVED = 'approved';
+    const PENDING = 'pending';
+    const REJECTED = 'rejected';
+    const NEED_ADDITIONAL_INFO = 'need_info';
     
     const AWAITING_PAYMENT = 'AW';
     const NO_OUTSTANDING_PAYMENT = 'NO';

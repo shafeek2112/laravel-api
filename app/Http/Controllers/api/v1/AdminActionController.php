@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\AdminActionService;
 use App\Traits\ApiResponser;
-
+use PhpParser\Node\Expr\Cast\String_;
 
 class AdminActionController extends Controller
 {
@@ -31,7 +31,25 @@ class AdminActionController extends Controller
         if(!empty($adminActionService['error'])) 
             return $this->error($adminActionService,401);
 
-        return $this->success($adminActionService,'User Record Updated Successfully', 200);
+        // dd(gettype($adminActionService));
+        return $this->success($adminActionService,'User Record Updated Successfully');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $loanApplicationNo
+     * @return \Illuminate\Http\Response
+     */
+    public function loanApproveReject(Request $request, $loanApplicationNo): String
+    {
+        $adminActionService = $this->adminActionService->loanApproveReject($request, $loanApplicationNo);
+
+        if(!empty($adminActionService['error'])) 
+            return $this->error($adminActionService,401);
+
+        return $this->success($adminActionService,'Loan Application Record Updated Successfully', 200);
     }
 
 }

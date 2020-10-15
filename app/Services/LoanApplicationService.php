@@ -59,7 +59,6 @@ class LoanApplicationService
     public function store($request)
     {
         $data = $request->all();
-
         $this->setAuthUser();
         
         # For simplicity, Admin can only create application for other normal users. Because to avoid the unwanted approval/rejection actions conflicts.
@@ -67,6 +66,10 @@ class LoanApplicationService
         # application is created for. Admin user cannot create application for themselves.
         if(($this->isAdmin) && ((empty($data['user_id'])) || (!empty($data['user_id']) && $this->user['id'] === $data['user_id'])) )
             return ['error' => 'Admin user cannot sumbit application for themselves. Please signup as normal user account then submit your loan application.'];
+
+        # If the submitted user is not admin,then set their own id as user_id.
+        if(!$this->isAdmin)
+            $data['user_id'] = $this->user['id'];
 
         # Admin also cannot application on behalf of another admin user.
         if(!$this->checkApplicationCreateForNormalUser($data['user_id']))

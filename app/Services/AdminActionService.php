@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\LoanStatus;
 use App\Models\LoanApplication;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -35,7 +36,7 @@ class AdminActionService
     }
 
      /**
-     * Store a newly created application.
+     * Approve or Reject user.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response or array
@@ -46,8 +47,8 @@ class AdminActionService
         
         $this->setAuthUser();
 
-        if(!$this->isAdmin)
-            return ['error' => 'You are not allowed to do this action.'];
+        // if(!$this->isAdmin)
+        //     return ['error' => 'You are not allowed to do this action.'];
 
         $validator = Validator::make($data, [
             'user_id'   => 'required|integer',
@@ -66,6 +67,42 @@ class AdminActionService
         if($user['status'] === $data['status'])
             return ['error' => 'This user is already in '.$user['status'].' status'];
 
-        return $user->fill($data)->save();
+        $user->fill($data)->save();
+        return $user;
+    }
+
+    /**
+     * Approve or reject Loan Application
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $loanApplicationNo
+     * @return \Illuminate\Http\Response or array
+     */
+    public function loanApproveReject($request, $loanApplicationNo)
+    {
+        $data = $request->all();
+        
+        $this->setAuthUser();
+
+        $validator = Validator::make($data, [
+            'approved_status'    => 'required|in:'.LoanStatus::APPROVED.','.LoanStatus::REJECTED,
+        ]);
+
+        if($validator->fails()){
+            return ['error' => $validator->errors()];
+        }
+
+        $loan = $this->loanApplicationModelInstance->where('application_no', $loanApplicationNo)->get()->first();
+        // dd($loan);
+        if(empty($loan))
+            return ['error' => 'Cannot find the Loan Application. Please check the "application_no" field.'];
+
+        if(($loan['approved_status'] === LoanStatus::APPROVED) || $loan['approved_status'] === $data['approved_status'])
+            return ['error' => 'This user is already in '.$loan['approved_status'].' status'];
+
+        
+        $loan->fill($data)->save();
+
+
     }
 }

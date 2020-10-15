@@ -20,7 +20,7 @@ class CreateLoanApplicationsTable extends Migration
             $table->string('loan_term',15);
             $table->string('repayment_frequency',10);
             $table->decimal('loan_amount', 8, 2);
-            $table->string('approved_status',2);
+            $table->string('approved_status',10);
             $table->date('application_date');
             $table->string('current_payment_status',5);
             $table->timestamps();
