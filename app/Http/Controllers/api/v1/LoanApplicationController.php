@@ -23,7 +23,7 @@ class LoanApplicationController extends Controller
      * @return JSON Repsonse
      */
     public function index(): String    
-    {    
+    { 
         $loanApplications = $this->loanApplicationService->all();
         return $this->success($loanApplications,'Successfully Fetched Loans', 200);
     }

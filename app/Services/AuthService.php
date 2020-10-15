@@ -15,19 +15,10 @@ use Illuminate\Support\Facades\Config;
 class AuthService
 {
     protected $userModelInstance;
-    protected $user;
 
     public function __construct()
     { 
         $this->userModelInstance = new User();
-    }
-
-    /* 
-    * This will set the Authuser 
-    */
-    public function setAuthUser(): void
-    {
-        $this->user = Auth::user();
     }
 
     /**
@@ -104,5 +95,15 @@ class AuthService
     public function logout($request)
     {
         return $request->user()->token()->revoke();
+    }
+
+    /**
+     * Get the authenticated User
+     *
+     * @return [json] user object
+     */
+    public function user($request)
+    {
+        return Auth::user();
     }
 }

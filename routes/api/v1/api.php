@@ -24,7 +24,7 @@ Route::group(['prefix' => '/auth', 'namespace' => 'App\Http\Controllers\api\v1']
     Route::post('login', 'AuthController@login');
     Route::post('signup', 'AuthController@register');
   
-    Route::group([ 'middleware' => 'auth:api' ], function() {
+    Route::group([ 'middleware' => ['auth:api','user.active'] ], function() {
         Route::get('logout', 'AuthController@logout');
         Route::get('user', 'AuthController@user');
     });
@@ -33,7 +33,7 @@ Route::group(['prefix' => '/auth', 'namespace' => 'App\Http\Controllers\api\v1']
 ## User Routes.
 Route::group(['prefix' => '/user', 'namespace' => 'App\Http\Controllers\api\v1'], function () {
 
-    Route::group([ 'middleware' => 'auth:api' ], function() {
+    Route::group([ 'middleware' => ['auth:api','user.active'] ], function() {
         Route::resource('loan-application', 'LoanApplicationController');
     });
 });
@@ -41,7 +41,7 @@ Route::group(['prefix' => '/user', 'namespace' => 'App\Http\Controllers\api\v1']
 ## Admin Routes.
 Route::group(['prefix' => '/admin', 'namespace' => 'App\Http\Controllers\api\v1'], function () {
 
-    Route::group([ 'middleware' => 'auth:api' ], function() {
+    Route::group([ 'middleware' => ['auth:api','user.active'] ], function() {
         Route::post('user', 'AdminActionController@userApproveReject');
         Route::post('loan', 'AdminActionController@loanApproveReject');
         Route::post('loan-payment', 'AdminActionController@loanPyamentApproveReject');

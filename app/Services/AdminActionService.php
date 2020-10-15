@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use App\Models\LoanApplication;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Enums\LoanStatus;
 use App\Enums\UserStatus;
 use App\Models\User;
 

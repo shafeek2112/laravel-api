@@ -88,10 +88,10 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $logout = $this->authService->logout($request);  
-        if(gettype($logout) === 'array' && !empty($login['error'])) 
+        $logout = $this->authService->logout($request); 
+        if(gettype($logout) === 'array' && !empty($logout['error'])) 
             return $this->error($logout,401);
-        
+
         return $this->success('','User Logged Out');
     }
 
@@ -102,6 +102,10 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        return $this->success(Auth::user());
+        $user = $this->authService->user($request);  
+        if(gettype($user) === 'array' && !empty($user['error'])) 
+            return $this->error($user,401);
+
+        return $this->success($user,'Fetched User');
     }
 }
