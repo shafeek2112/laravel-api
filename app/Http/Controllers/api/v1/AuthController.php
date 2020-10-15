@@ -9,6 +9,7 @@ use App\Traits\ApiResponser;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Config; 
+use App\Enums\UserStatus;
 
 class AuthController extends Controller
 {
@@ -65,6 +66,12 @@ class AuthController extends Controller
         //Genereate the token and save into DB
         $user = $request->user();
         
+        if($user['status'] === UserStatus::REJECTED)
+            return $this->error('You account is deactivated. Please contact admin', 401);
+        
+        if($user['status'] === UserStatus::PENDING)
+            return $this->error('You account is not activated yet, Please try after sometimes', 401);
+
         if (request()->remember_me === 'true')
             Passport::personalAccessTokensExpireIn(now()->addDays(15));
 

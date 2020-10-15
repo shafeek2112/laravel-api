@@ -69,12 +69,12 @@ class LoanApplicationService
             return ['error' => 'Admin user cannot sumbit application for themselves. Please signup as normal user account then submit your loan application.'];
 
         # Admin also cannot application on behalf of another admin user.
-        if(!$this->checkApplicationCreateForNormalUser())
+        if(!$this->checkApplicationCreateForNormalUser($data['user_id']))
             return ['error' => 'Admin user cannot sumbit application for another Admin user.'];
 
         $lastApplicationId              = $this->loanApplicationModelInstance::orderBy('id','DESC')->first()->id ?? 0;
         $data['application_no']         = 'LA-'.str_pad($lastApplicationId + 1, 8, "0", STR_PAD_LEFT);
-        $data['user_id']                = $this->user['id'];
+        $data['user_id']                = $data['user_id'];
         $data['approved_status']        = LoanStatus::PENDING;
         $data['application_date']       = date('Y-m-d');
         $data['current_payment_status'] = '';
@@ -96,17 +96,7 @@ class LoanApplicationService
      */
     public function findByApplicationNo(string $loanApplicationNo)
     {
-        $this->setAuthUser();
-
-        $this->loanApplication = $this->loanApplicationModelInstance->where('application_no', $loanApplicationNo)->get()->first();
-        
-        if(empty($this->loanApplication))
-            return ['error' => 'Cannot find the application. Please check your application number.'];
-
-        if(!$this->checkRequestedActionOwnership())
-            return ['error' => 'You are not allowed to access this application.'];
-
-        return $this->loanApplication;
+        return $this->checkValidationFindApplication($loanApplicationNo);
     }
 
     /**
@@ -120,10 +110,10 @@ class LoanApplicationService
     {
         $this->setAuthUser();
 
-        $this->loanApplication = $this->loanApplicationModelInstance->where('application_no', $loanApplicationNo)->get();
-        
-        if(!$this->checkRequestedActionOwnership())
-            return ['error' => 'You are not allowed to access this application.'];
+        $this->loanApplication = $this->checkValidationFindApplication($loanApplicationNo);
+
+        if(!empty($this->loanApplication['error'])) 
+            return $this->loanApplication;
             
         # Check the status of the Loan Application, if deleted/approved/rejected then user cannot edit this.
         if(!$this->checkApplicationCanBeEditable())
@@ -140,6 +130,28 @@ class LoanApplicationService
         return $this->loanApplication->fill($data)->save();
     }
 
+     /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $loanApplicationNo
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(string $loanApplicationNo)
+    {
+        $this->setAuthUser();
+
+        $this->loanApplication = $this->checkValidationFindApplication($loanApplicationNo);
+
+        if(!empty($this->loanApplication['error'])) 
+            return $this->loanApplication;
+
+        # Check the status of the Loan Application, if deleted/approved/rejected then user cannot edit this.
+        if(!$this->checkApplicationCanBeEditable())
+            return ['error' => 'This Application is in '.$this->getApplicationCurrentStatus().' status, so you cannot delete this.'];
+        
+        return $this->loanApplication::destroy($this->loanApplication['id']);
+    }
+
     /**
      * To pay the repay amount.
      *
@@ -151,20 +163,19 @@ class LoanApplicationService
        
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $loanApplicationNo
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(string $loanApplicationNo)
+    public function checkValidationFindApplication(string $loanApplicationNo)
     {
         $this->setAuthUser();
 
+        $this->loanApplication = $this->loanApplicationModelInstance->where('application_no', $loanApplicationNo)->get()->first();
+        
+        if(empty($this->loanApplication))
+            return ['error' => 'Cannot find the application. Please check your application number.'];
+
         if(!$this->checkRequestedActionOwnership())
             return ['error' => 'You are not allowed to access this application.'];
-        
-        return $this->loanApplicationModelInstance::destroy($loanApplicationNo);
+
+        return $this->loanApplication;
     }
 
     /**
@@ -182,9 +193,9 @@ class LoanApplicationService
      *
      * @return boolen
      */
-    public function checkApplicationCreateForNormalUser(): bool
+    public function checkApplicationCreateForNormalUser(string $user_id): bool
     {
-        $user = User::find($this->user['id']);
+        $user = User::find($user_id);
         return ($user['is_admin'] === 'Y') ? FALSE : TRUE;
     }
 

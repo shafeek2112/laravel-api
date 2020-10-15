@@ -15,11 +15,6 @@ class LoanApplicationController extends Controller
 
     public function __construct()
     {
-       /*  $this->middleware(function ($request, $next) {
-            
-            # Initiate the Service class inside the middleware to get access of Auth::user in the constructor.
-            $this->loanApplicationService = new LoanApplicationService();
-        });  */
         $this->loanApplicationService = new LoanApplicationService();
     }
 
@@ -80,17 +75,22 @@ class LoanApplicationController extends Controller
         if(!empty($loanApplications['error'])) 
             return $this->error($loanApplications,401);
 
-        return $this->success($loanApplications,'Successfully Added Loan', 200);
+        return $this->success($loanApplications,'Successfully Edited the Loan Application', 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int  $loanApplicationNo
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(string $loanApplicationNo)
     {
-        //
+        $loanApplications = $this->loanApplicationService->destroy($loanApplicationNo);  
+
+        if(!empty($loanApplications['error'])) 
+            return $this->error($loanApplications,401);
+
+        return $this->success($loanApplications,'Successfully deleted the Loan Application', 200);
     }
 }
