@@ -87,7 +87,7 @@ After install passport, then run DB seed command to seed the default admin user 
 php artisan db:seed
 ```
 
-Now you start the server by run 
+Now you can start the server by run 
 ```bash
 php artisan serve
 ```
