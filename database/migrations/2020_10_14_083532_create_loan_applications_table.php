@@ -20,8 +20,8 @@ class CreateLoanApplicationsTable extends Migration
             $table->string('loan_term',15);
             $table->string('repayment_frequency',10);
             $table->decimal('loan_amount', 8, 2);
-            $table->decimal('one_time_repayment_amount', 8, 2)->nullable();
-            $table->decimal('repaid_loan_amount', 8, 2)->nullable();
+            $table->decimal('each_instalment_payment_amount', 8, 2)->nullable();
+            $table->decimal('total_repaid_loan_amount', 8, 2)->nullable();
             $table->string('approved_status',10);
             $table->date('application_date');
             $table->string('current_payment_status',5);

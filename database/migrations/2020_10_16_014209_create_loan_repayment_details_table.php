@@ -19,7 +19,7 @@ class CreateLoanRepaymentDetailsTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('loan_application_id');
             $table->decimal('loan_repayment_amount', 8, 2);
-            $table->string('status',10)->default(LoanStatus::PAYMENT_STATUS_PROCESSING);
+            $table->string('status',10)->default(LoanStatus::PAYMENT_STATUS_PENDING);
             $table->date('payment_date')->nullable();
             $table->timestamps();
 

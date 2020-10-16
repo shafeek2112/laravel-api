@@ -49,36 +49,11 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        /* $attr = $request->validate([
-            'email'         => 'required|string|email',
-            'password'      => 'required|string',
-            'remember_me'   => 'boolean'
-        ]);
-
-        if (!Auth::attempt($attr))
-            return $this->error('Credentials mismatch', 401);
-
-        $user = $request->user();
-        
-        if($user['status'] === UserStatus::REJECTED)
-            return $this->error('You account is deactivated. Please contact admin', 401);
-        
-        if($user['status'] === UserStatus::PENDING)
-            return $this->error('You account is not activated yet, Please try after sometimes', 401);
-
-        if (request()->remember_me === 'true')
-            Passport::personalAccessTokensExpireIn(now()->addDays(15));
-
-        //Genereate the token and save into DB
-        $tokenResult = $user->createToken(Config::get('constants.ADMIN_NAME'));
-        return $this->token($tokenResult,'Successfully Logged In'); */
-
-
         $login = $this->authService->login($request);  
         if(gettype($login) === 'array' && !empty($login['error'])) 
             return $this->error($login,401);
 
-        return $this->success($login,'Successfully Logged In Registered', 200);
+        return $this->success($login,'Successfully Logged In', 200);
     }
 
     /**
@@ -92,13 +67,13 @@ class AuthController extends Controller
         if(gettype($logout) === 'array' && !empty($logout['error'])) 
             return $this->error($logout,401);
 
-        return $this->success('','User Logged Out');
+        return $this->success('','Successfully Logged Out');
     }
 
     /**
      * Get the authenticated User
-     *
-     * @return [json] user object
+     *  @param  \Illuminate\Http\Request  $request
+     *  @return [json] user object
      */
     public function user(Request $request)
     {

@@ -36,7 +36,7 @@ class AdminActionController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Approve or Reject the loan
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $loanApplicationNo
@@ -45,11 +45,26 @@ class AdminActionController extends Controller
     public function loanApproveReject(Request $request, $loanApplicationNo): String
     {
         $adminActionService = $this->adminActionService->loanApproveReject($request, $loanApplicationNo);
-
         if(!empty($adminActionService['error'])) 
             return $this->error($adminActionService,401);
 
         return $this->success($adminActionService,'Loan Application Record Updated Successfully', 200);
+    }
+
+    /**
+     * Approve / Reject payment
+     *
+     *  @param  \Illuminate\Http\Request  $request
+     *  @param  int  $loanRepaymentDetailId
+     *  @return \Illuminate\Http\Response
+     */
+    public function loanPyamentApproveReject(Request $request, string $loanRepaymentDetailId)
+    {
+        $adminActionService = $this->adminActionService->loanPyamentApproveReject($request, $loanRepaymentDetailId); 
+        if(!empty($adminActionService['error'])) 
+            return $this->error($adminActionService,401);
+
+        return $this->success($adminActionService,'Successfully Updated the Payment', 200);
     }
 
 }

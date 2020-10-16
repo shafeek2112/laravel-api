@@ -175,7 +175,7 @@ class LoanApplicationService
         
         $data = ['where' => $where, 'loan_application_no' => $loanApplicationNo];
         $validator = Validator::make($data, [
-            'where'                 => 'required|in:'.LoanStatus::PAYMENT_STATUS_PAID.','.LoanStatus::PAYMENT_STATUS_FAILED.','.LoanStatus::PAYMENT_STATUS_PROCESSING.','.LoanStatus::PAYMENT_STATUS_ALL,
+            'where'                 => 'required|in:'.LoanStatus::PAYMENT_STATUS_PENDING.','.LoanStatus::PAYMENT_STATUS_PAID.','.LoanStatus::PAYMENT_STATUS_FAILED.','.LoanStatus::PAYMENT_STATUS_PAYMENT_PROCESSING.','.LoanStatus::PAYMENT_STATUS_ALL,
             'loan_application_no'   =>  'required'
         ]);
        
@@ -190,22 +190,50 @@ class LoanApplicationService
             $whereCondition['status'] = $where;
         
         ## Check if this admin or normal user. If admin then just get all the application.
-        if(!$this->isAdmin)
+        if($this->isAdmin)
+        {
+            $loanRepaymentDetail = $this->loanApplicationDetailModelInstance->where($whereCondition)->get();
+        }
+        else
+        {
             $whereCondition['user_id'] =  $this->user['id'];
-
-        $loanRepaymentDetail = empty($whereCondition) ? $this->user->loanRepaymentDetail->all() : $this->user->loanRepaymentDetail()->where($whereCondition)->get();
+            $loanRepaymentDetail = $this->user->loanRepaymentDetail()->where($whereCondition)->get();
+        }
         return $loanRepaymentDetail;
     }
 
     /**
-     * To pay the repay amount.
+     * Pay instalment
      *
-     * @param  int  $loanApplicationNo
+     * @param  int  $loanRepaymentDetailId
      * @return \Illuminate\Http\Response
      */
-    public function payInstalment(string $loanApplicationNo)
+    public function payInstalment(string $loanRepaymentDetailId)
     {
+        $this->setAuthUser();
         
+        $data = ['loan_repayment_detail_id' => $loanRepaymentDetailId];
+        $validator = Validator::make($data, [
+            'loan_repayment_detail_id'   =>  'required'
+        ]);
+        if($validator->fails())
+            return ['error' => $validator->errors()];
+
+        ## Vaild check
+        $this->loanApplication = $this->loanApplicationDetailModelInstance->find($loanRepaymentDetailId);
+        if(empty($this->loanApplication)) 
+            return ['error' => 'Cannot find the application. Please check your application number.'];
+
+        ## If the requested application is not belongs to auth user then return error. Eventhough Admin.
+        if($this->user['id'] != $this->loanApplication['user_id'])
+            return ['error' => 'You are not the owner of this application, so you are not allowed to pay for this loan.'];
+
+        ## If the status already in processing or paid then cannot pay again.
+        if($this->loanApplication['status'] !== LoanStatus::PAYMENT_STATUS_PENDING && $this->loanApplication['status'] !== LoanStatus::PAYMENT_STATUS_FAILED)
+            return ['error' => 'You cannot pay for this instalment. This is already in '.$this->loanApplication['status'].' status.'];
+
+        $updateDate = ['status' => LoanStatus::PAYMENT_STATUS_PAYMENT_PROCESSING, 'payment_date' => date('Y-m-d')];
+        return $this->loanApplication->fill($updateDate)->save();
     }
 
     public function checkValidationFindApplication(string $loanApplicationNo)
@@ -214,9 +242,11 @@ class LoanApplicationService
 
         $this->loanApplication = $this->loanApplicationModelInstance->where('application_no', $loanApplicationNo)->get()->first();
         
+        ## Invalid request.
         if(empty($this->loanApplication))
             return ['error' => 'Cannot find the application. Please check your application number.'];
-
+        
+        ## ownership check..
         if(!$this->checkRequestedActionOwnership())
             return ['error' => 'You are not allowed to access this application.'];
 
@@ -230,6 +260,7 @@ class LoanApplicationService
      */
     public function checkRequestedActionOwnership(): bool
     {
+         ## Auth user must be admin or owner of the application..
         return ((!$this->isAdmin) && ($this->user['id'] != $this->loanApplication['user_id'])) ? FALSE : TRUE;
     }
     

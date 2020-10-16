@@ -36,6 +36,7 @@ Route::group(['prefix' => '/user', 'namespace' => 'App\Http\Controllers\api\v1']
     Route::group([ 'middleware' => ['auth:api','user.active'] ], function() {
         Route::resource('loan-application', 'LoanApplicationController');
         Route::get('loan-repayment-list/{loan_id}/{type}', 'LoanApplicationController@repaymentInstalmentList');
+        Route::post('pay-instalment/{loan_repayment_detail_id}', 'LoanApplicationController@payInstalment');
     });
 });
 
@@ -45,7 +46,7 @@ Route::group(['prefix' => '/admin', 'namespace' => 'App\Http\Controllers\api\v1'
     Route::group([ 'middleware' => ['auth:api','user.active','user.admin'] ], function() {
         Route::post('user', 'AdminActionController@userApproveReject');
         Route::post('loan/{application_no}', 'AdminActionController@loanApproveReject');
-        Route::post('loan-payment', 'AdminActionController@loanPyamentApproveReject');
-        Route::post('release-next-term', 'AdminActionController@loanNextPaymentTermRelease');
+        Route::post('payment-update/{loan_repayment_detail_id}', 'AdminActionController@loanPyamentApproveReject');
+        // Route::post('release-next-term', 'AdminActionController@loanNextPaymentTermRelease');
     });
 });

@@ -48,6 +48,7 @@ abstract class LoanStatus extends Enum
      ################ LoanRepayment Payment status
      const PAYMENT_STATUS_PAID = 'paid';
      const PAYMENT_STATUS_FAILED = 'failed';
-     const PAYMENT_STATUS_PROCESSING = 'processing';
+     const PAYMENT_STATUS_PAYMENT_PROCESSING = 'processing';
+     const PAYMENT_STATUS_PENDING = 'pending';
      const PAYMENT_STATUS_ALL = 'all';
 }

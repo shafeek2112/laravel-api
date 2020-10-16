@@ -41,7 +41,7 @@ class LoanApplicationController extends Controller
         if(!empty($loanApplications['error'])) 
             return $this->error($loanApplications,401);
 
-        return $this->success($loanApplications,'Successfully Added Loan', 200);
+        return $this->success($loanApplications,'Loan has been successfully added', 200);
     }
 
     /**
@@ -104,5 +104,19 @@ class LoanApplicationController extends Controller
     {
         $loanApplications = $this->loanApplicationService->repaymentInstalmentList($loanApplicationNo,$where);  
         return $this->success($loanApplications,'Successfully Fetched Loan Payment List', 200);
+    }
+    
+    /**
+     * Pay instalment
+     *
+     * @param  string  $loanRepaymentDetailId
+     * @return \Illuminate\Http\Response
+     */
+    public function payInstalment(string $loanRepaymentDetailId)
+    {
+        $loanApplications = $this->loanApplicationService->payInstalment($loanRepaymentDetailId);  
+        if(!empty($loanApplications['error'])) 
+            return $this->error($loanApplications,401);
+        return $this->success($loanApplications,'Successfully Submitted Payment.', 200);
     }
 }

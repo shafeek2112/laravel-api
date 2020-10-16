@@ -10,10 +10,8 @@ use App\Enums\UserStatus;
 use App\Models\LoanRepaymentDetail;
 use App\Models\User;
 
-
-
 /**
- * ClaimRepository 
+ * All the admin actions are handled here. Added admin middleware to filter the admin user when request comes in. 
  */
 class AdminActionService
 {
@@ -52,9 +50,6 @@ class AdminActionService
         
         $this->setAuthUser();
 
-        // if(!$this->isAdmin)
-        //     return ['error' => 'You are not allowed to do this action.'];
-
         $validator = Validator::make($data, [
             'user_id'   => 'required|integer',
             'status'    => 'required|in:'.UserStatus::APPROVED.','.UserStatus::PENDING.','.UserStatus::REJECTED,
@@ -69,6 +64,7 @@ class AdminActionService
         if(empty($user))
             return ['error' => 'Cannot find the user. Please check the "user_id" field.'];
 
+        # If already is in same status dont need to update again to reduce the db request.
         if($user['status'] === $data['status'])
             return ['error' => 'This user is already in '.$user['status'].' status'];
 
@@ -102,32 +98,34 @@ class AdminActionService
             return ['error' => 'Cannot find the Loan Application. Please check the "application_no" field.'];
 
         # For simplicity - If loan is already in approval status cannot change back to Rejected or Pending. Becas it will affect the old 
-        # Loan payment detail records.
+        # Loan repayment detail records.
+        # If already is in same status dont need to update again to reduce the db load.
         if(($this->loanApplication['approved_status'] === LoanStatus::APPROVED) || $this->loanApplication['approved_status'] === $data['approved_status'])
-            return ['error' => 'This user is already in '.$this->loanApplication['approved_status'].' status'];
-
+            return ['error' => 'This record is already in '.$this->loanApplication['approved_status'].' status'];
     
+        # Update the record.
         $this->loanApplication->fill($data)->save();
 
-        # If the loan is successfully approved then create one new record for first repayment instalment.
+        # If the loan is successfully approved, then automatically create one new record for first repayment instalment.
         if($data['approved_status'] === LoanStatus::APPROVED)
         {
-            ## First find the one time instalment from payment term and payemnt frequency for the loan and save into loan application table.
+            ## First find the each time instalment from payment term and payemnt frequency for the loan and save into loan application table. By saving this,
+            ## we dont need to recalculate every time when creating the new instalment amount.
             $findEachInstalmentAmount = $this->findEachInstalmentAmount();
-            $this->loanApplication->fill(['one_time_repayment_amount' => $findEachInstalmentAmount])->save();
+            $this->loanApplication->fill(['each_instalment_payment_amount' => $findEachInstalmentAmount])->save();
 
-            ## Create the first time repayment record.
-            $loanRepayData = [
-                'user_id'                   => $this->loanApplication['user_id'],
-                'loan_application_id'       => $this->loanApplication['id'],
-                'loan_repayment_amount'     => $this->findNextRepaymentAmount(),
-            ];
-            $this->loanRepaymentDetailModelInstance::create($loanRepayData);
+            ## Calculate and store the next instalment amount into loan repayment table
+            $this->storeNextInstalmentAmount();
         }
 
         return $this->loanApplication;
     }
 
+    /**
+    * Calculate single instalment amount from payment term and payemnt frequency
+    *
+    * @return decimal
+    */
     public function findEachInstalmentAmount()
     {
         ## Get the loan term - 12months / 24months / 64months.
@@ -149,14 +147,95 @@ class AdminActionService
         return ceil($this->loanApplication['loan_amount'] / $totalInstalment);
     }
 
+    /**
+     * Calculate the next instalment payment
+     *
+     * @return decimal
+     */
+    public function storeNextInstalmentAmount()
+    {
+        ## Create the first time repayment record.
+        $nextRepaymentAmount = $this->findNextRepaymentAmount();
+
+        ## If next instalment is 0 then no need to insert.
+        if($nextRepaymentAmount > 0)
+        {
+            $loanRepayData = [
+                'user_id'                   => $this->loanApplication['user_id'],
+                'loan_application_id'       => $this->loanApplication['id'],
+                'loan_repayment_amount'     => $nextRepaymentAmount,
+            ];
+            $this->loanRepaymentDetailModelInstance::create($loanRepayData);
+        }
+    }
+
+    /**
+     * Calculate the next instalment payment
+     *
+     * @return decimal
+     */
     public function findNextRepaymentAmount()
     {
-        $nextRepaymentAmount = $this->loanApplication['one_time_repayment_amount'];
+        $nextRepaymentAmount = $this->loanApplication['each_instalment_payment_amount'];
 
-        ## If the sum of (already paid + next repayment) is greater than the actual loan amount then we just take the difference of (actual loan amount - already paid amount)
-        if(($this->loanApplication['repaid_loan_amount'] + $nextRepaymentAmount) > $this->loanApplication['loan_amount'])
-            return ($this->loanApplication['loan_amount'] - $this->loanApplication['repaid_loan_amount']);
+        ## If the sum of (already paid + next repayment) is greater than the actual loan amount, then 
+        ## we just take the difference of (actual loan amount - already paid amount) to avoid over payment
+        if(($this->loanApplication['total_repaid_loan_amount'] + $nextRepaymentAmount) > $this->loanApplication['loan_amount'])
+            return ($this->loanApplication['loan_amount'] - $this->loanApplication['total_repaid_loan_amount']);
 
         return $nextRepaymentAmount;
+    }
+
+    /**
+     * Approve or reject Instalment
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $loanRepaymentDetailId
+     * @return \Illuminate\Http\Response or array
+     */
+    public function loanPyamentApproveReject($request, $loanRepaymentDetailId)
+    {
+        $data = $request->all();
+        
+        $this->setAuthUser();
+
+        $validator = Validator::make($data, [
+            'status'    => 'required|in:'.LoanStatus::PAYMENT_STATUS_PAID.','.LoanStatus::PAYMENT_STATUS_FAILED,
+        ]);
+
+        if($validator->fails()){
+            return ['error' => $validator->errors()];
+        }
+
+        ## Get the loan Repayment Detail record
+        $this->loanRepaymentDetail = $this->loanRepaymentDetailModelInstance->find($loanRepaymentDetailId);
+        if(empty($this->loanRepaymentDetail)) 
+            return ['error' => 'Cannot find the application. Please check your Loan Payment Deatil ID.'];
+
+        # For simplicity - If payment is already in paid status cannot change back to failed.
+        #  If already is in same status dont need to update again to reduce the db load.
+        if(($this->loanRepaymentDetail['status'] === LoanStatus::PAYMENT_STATUS_PAID) || $this->loanRepaymentDetail['status'] === $data['status'])
+            return ['error' => 'This payment is already in '.$this->loanRepaymentDetail['status'].' status'];
+
+        # Only allow this action, if the status is in Processing, so that admin cannot change into PAID status before user actually paid.
+        if(($this->loanRepaymentDetail['status'] !== LoanStatus::PAYMENT_STATUS_PAYMENT_PROCESSING))
+            return ['error' => 'This payment is not yet made by the user for this. So you cannot approve before payment is paid.'];
+
+        # Update record.
+        $this->loanRepaymentDetail->fill($data)->save();
+
+         # If the instalment is successfully approved, then auto create next instalment record.
+         if($data['status'] === LoanStatus::PAYMENT_STATUS_PAID)
+         {
+            ## Update the totalrepaid amount in LoanAPplication table 
+            $this->loanApplication = $this->loanApplicationModelInstance->find($this->loanRepaymentDetail['loan_application_id']);
+
+            $totalRepaidAmountSoFar = $this->loanApplication['total_repaid_loan_amount']+$this->loanRepaymentDetail['loan_repayment_amount'];
+            $this->loanApplication->fill(['total_repaid_loan_amount' => $totalRepaidAmountSoFar])->save();
+ 
+            ## Calculate and store the next instalment amount into loan repayment table
+            $this->storeNextInstalmentAmount();
+        }
+        return $this->loanRepaymentDetail;
     }
 }

@@ -18,8 +18,8 @@ class LoanApplication extends Model
         'loan_term',
         'repayment_frequency',
         'loan_amount',
-        'one_time_repayment_amount',
-        'repaid_loan_amount',
+        'each_instalment_payment_amount',
+        'total_repaid_loan_amount',
         'approved_status',
         'application_date',
         'current_payment_status',
@@ -38,6 +38,6 @@ class LoanApplication extends Model
     */
     public function loanRepaymentDetail()
     {
-        return $this->hasMany(LoanRepaymentDetail::class);
+        return $this->hasMany(LoanRepaymentDetail::class,'loan_application_id');
     }
 }
