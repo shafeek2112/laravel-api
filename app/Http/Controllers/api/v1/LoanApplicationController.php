@@ -92,4 +92,17 @@ class LoanApplicationController extends Controller
 
         return $this->success($loanApplications,'Successfully deleted the Loan Application', 200);
     }
+
+    /**
+     * Get all/outstanding instalment
+     *
+     * @param  int  $loanApplicationNo
+     * @param  string  $all
+     * @return \Illuminate\Http\Response
+     */
+    public function repaymentInstalmentList(string $loanApplicationNo, string $where = 'all')
+    {
+        $loanApplications = $this->loanApplicationService->repaymentInstalmentList($loanApplicationNo,$where);  
+        return $this->success($loanApplications,'Successfully Fetched Loan Payment List', 200);
+    }
 }

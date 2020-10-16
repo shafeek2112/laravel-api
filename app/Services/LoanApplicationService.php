@@ -7,8 +7,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Enums\LoanStatus;
+use App\Models\LoanRepaymentDetail;
 use App\Models\User;
-
+use Illuminate\Support\Facades\DB;
 
 /**
  * ClaimRepository 
@@ -17,12 +18,14 @@ class LoanApplicationService
 {
     protected $loanApplication;
     protected $loanApplicationModelInstance;
+    protected $loanApplicationDetailModelInstance;
     protected $isAdmin;
     protected $user;
 
     public function __construct()
     { 
-        $this->loanApplicationModelInstance  = new LoanApplication();
+        $this->loanApplicationModelInstance         = new LoanApplication();
+        $this->loanApplicationDetailModelInstance   = new LoanRepaymentDetail();
     }
 
     /* 
@@ -156,14 +159,53 @@ class LoanApplicationService
     }
 
     /**
+     * Get all/outstanding instalment
+     *
+     * @param  int  $loanApplicationNo
+     * @param  string  $all
+     * @return \Illuminate\Http\Response
+     */
+    public function repaymentInstalmentList(string $loanApplicationNo, string $where)
+    {
+        $this->setAuthUser();
+        
+        $this->loanApplication = $this->checkValidationFindApplication($loanApplicationNo);
+        if(!empty($this->loanApplication['error'])) 
+            return $this->loanApplication;
+        
+        $data = ['where' => $where, 'loan_application_no' => $loanApplicationNo];
+        $validator = Validator::make($data, [
+            'where'                 => 'required|in:'.LoanStatus::PAYMENT_STATUS_PAID.','.LoanStatus::PAYMENT_STATUS_FAILED.','.LoanStatus::PAYMENT_STATUS_PROCESSING.','.LoanStatus::PAYMENT_STATUS_ALL,
+            'loan_application_no'   =>  'required'
+        ]);
+       
+        if($validator->fails()){
+            return ['error' => $validator->errors()];
+        }
+       
+        $whereCondition = [];
+
+        ## Check if any filter applied
+        if($where !== 'all')
+            $whereCondition['status'] = $where;
+        
+        ## Check if this admin or normal user. If admin then just get all the application.
+        if(!$this->isAdmin)
+            $whereCondition['user_id'] =  $this->user['id'];
+
+        $loanRepaymentDetail = empty($whereCondition) ? $this->user->loanRepaymentDetail->all() : $this->user->loanRepaymentDetail()->where($whereCondition)->get();
+        return $loanRepaymentDetail;
+    }
+
+    /**
      * To pay the repay amount.
      *
      * @param  int  $loanApplicationNo
      * @return \Illuminate\Http\Response
      */
-    public function repayment(string $loanApplicationNo)
+    public function payInstalment(string $loanApplicationNo)
     {
-       
+        
     }
 
     public function checkValidationFindApplication(string $loanApplicationNo)
@@ -213,8 +255,8 @@ class LoanApplicationService
         return  Validator::make($data, [
                     'loan_amount'           => 'required|regex:/^\d+(\.\d{1,2})?$/',
                     'loan_term'             => 'required|in:'.LoanStatus::LOAN_TERM_SHORT.','.LoanStatus::LOAN_TERM_MEDIUM.','.LoanStatus::LOAN_TERM_LONG,
-                    'repayment_frequency'   => 'required|in:'.LoanStatus::REPAYMENT_FREQUENCY_WEEKLY.','.LoanStatus::REPAYMENT_FREQUENCY_MONTHLY.','.LoanStatus::REPAYMENT_FREQUENCY_YEARLY,
-                ]);
+                    'repayment_frequency'   => 'required|in:'.LoanStatus::REPAYMENT_FREQUENCY_WEEKLY.','.LoanStatus::REPAYMENT_FREQUENCY_MONTHLY.','.LoanStatus::REPAYMENT_FREQUENCY_DEFAULT,
+        ]);
     }
 
     /**

@@ -52,4 +52,12 @@ class User extends Authenticatable
         return $this->hasMany(LoanApplication::class);
     }
 
+    /* 
+    * Each User may have many LoanRepaymentDetail Records
+    */
+    public function loanRepaymentDetail()
+    {
+        return $this->hasMany(LoanRepaymentDetail::class);
+    }
+
 }
