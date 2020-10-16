@@ -11,7 +11,9 @@ Git Clone https://github.com/shafeek2112/laravel-api.git
 ```
 
 After download the project, run composer install to install necessary packages.
-•	composer install
+```bash
+composer install
+```
 
 Create the database and configure the DB connection in .env file. Open .env file to modify the DB credentials to suit your needs, 
 
