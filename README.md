@@ -6,8 +6,9 @@
 
 Clone this project using below command or download as zip and install in your 
 system.
-•	Git Clone https://github.com/shafeek2112/laravel-api.git
-
+```bash
+Git Clone https://github.com/shafeek2112/laravel-api.git
+```
 
 After download the project, run composer install to install necessary packages.
 •	composer install
