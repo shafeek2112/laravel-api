@@ -94,6 +94,8 @@ php artisan serve
 
 You can see your local server running on your system.
 
+## API Info & Flow instruction
+
 Please refer the user manual document for how to use API and the flow instruction
 
 
