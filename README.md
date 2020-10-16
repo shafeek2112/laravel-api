@@ -4,15 +4,15 @@
 
 ## Installation
 
-Clone this project using Git clone using below command or download as zip and install in your 
+Clone this project using below command or download as zip and install in your 
 system.
 •	Git Clone https://github.com/shafeek2112/laravel-api.git
 
 
-After setup this in your system, run composer install command to install necessary packages.
+After download the project, run composer install to install necessary packages.
 •	composer install
 
-Open .env file to modify the DB credentials to suit your needs, 
+Create the database and configure the DB connection in .env file. Open .env file to modify the DB credentials to suit your needs, 
 
 ```
 APP_NAME=Laravel
@@ -73,26 +73,25 @@ Then run your migration
 php artisan migrate
 ```
 
-Then run 
+Then install passport service using below command 
 ```bash
 php artisan passport:install
 ```
 
-After install passport, then run DB seed command to seed the default admin user into DB for quick setup
+After install passport, then run DB seed command to seed the default admin user record into your DB for quick setup
 
 ```bash
 php artisan db:seed
 ```
 
-Now you start the server by run this 
+Now you start the server by run 
 ```bash
 php artisan serve
 ```
 
 You can see your local server running on your system.
 
-When testing the API using Postman, if you face this message 
-“Personal access client not found. please create one”, then run this `php artisan passport:install` again.
+Please refer the user manual document for how to use API and the flow instruction
 
 
 ## Tests
