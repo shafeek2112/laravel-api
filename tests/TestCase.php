@@ -14,6 +14,13 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         Artisan::call('passport:install');
+
+        // This will run all your migration
+        // Artisan::call('migrate');
+
+        // // This will seed your database
+        Artisan::call('db:seed');
+
     }
 
     

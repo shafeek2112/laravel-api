@@ -1,0 +1,9 @@
+Laravel starter
+
+(Assuming you've installed Laravel & composer)
+
+Clone this project using Git clone using below command or download as zip and install in your 
+system.
+ - Git Clone https://github.com/shafeek2112/laravel-api.git
+
+After setup this in your system, run composer install command to install neccessary 
