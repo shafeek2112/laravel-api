@@ -83,7 +83,8 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        $user = $this->authService->user($request);  
+        $user = $this->authService->user($request);
+        dd($user);  
         if(gettype($user) === 'array' && !empty($user['error'])) 
             return $this->error($user,401);
 

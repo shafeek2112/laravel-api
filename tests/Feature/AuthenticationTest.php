@@ -4,6 +4,8 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\WithFaker;
 use Faker\Factory as Faker; 
 use Tests\TestCase;
+use App\Models\Thread;
+use App\Models\User;
 
 class AuthenticationTest extends TestCase
 {
@@ -77,10 +79,15 @@ class AuthenticationTest extends TestCase
     */
     public function testAlreadyTakenEmailRegister()
     {
+        User::factory()->create([
+            'email'     => 'sample@test.com',
+            'password'  => $this->faker->password,
+        ]);
+
         $userData = [
-            "name" => "Test User 1",
-            "email" => "testuser1@aspire.test",
-            "password" => "testuser1",
+            "name"      => $this->faker->name,
+            "email"     => "sample@test.com",
+            "password"  => "testuser1",
             "password_confirmation" => "testuser1"
         ];
 

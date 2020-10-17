@@ -25,6 +25,7 @@ class LoanApplicationController extends Controller
     public function index(): String    
     { 
         $loanApplications = $this->loanApplicationService->all();
+        dd($loanApplications);
         return $this->success($loanApplications,'Successfully Fetched Loans', 200);
     }
 
