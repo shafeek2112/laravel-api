@@ -22,7 +22,9 @@ class AdminApiMiddleware
         } else {
             return response()->json([
                 'status'	=> 'Error', 
-                'message' 	=> 'You are not Admin to do this action.', 
+                'message' 	=> [
+                    'error' => 'You are not Admin to do this action.', 
+                ],
                 'data' 		=> [],
                 'code'		=> 403
             ]);

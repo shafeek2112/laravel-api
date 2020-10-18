@@ -22,7 +22,7 @@ class ApiMiddleware
         } else {
             return response()->json([
                 'status'	=> 'Error', 
-                'message' 	=> 'You account is not active. You are not allowed to do this action, please contact your admin', 
+                'message' 	=> 'You account is not active. Please contact your admin', 
                 'data' 		=> [],
                 'code'		=> 403
             ]);

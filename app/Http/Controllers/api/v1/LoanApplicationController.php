@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\LoanApplicationService;
 use App\Traits\ApiResponser;
+use App\Http\Resources\LoanApplicationResource;
 
 class LoanApplicationController extends Controller
 {
@@ -14,7 +15,7 @@ class LoanApplicationController extends Controller
 
     public function __construct()
     {
-        $this->loanApplicationService = new LoanApplicationService();
+        $this->loanApplicationService   = new LoanApplicationService();
     }
 
     /**
@@ -22,10 +23,9 @@ class LoanApplicationController extends Controller
      *
      * @return JSON Repsonse
      */
-    public function index(): String    
+    public function index()    
     { 
-        $loanApplications = $this->loanApplicationService->all();
-        dd($loanApplications);
+        $loanApplications = LoanApplicationResource::collection($this->loanApplicationService->all());
         return $this->success($loanApplications,'Successfully Fetched Loans', 200);
     }
 
@@ -58,7 +58,7 @@ class LoanApplicationController extends Controller
         if(!empty($loanApplications['error'])) 
             return $this->error($loanApplications,401);
 
-        return $this->success($loanApplications,'Successfully Fetched', 200);
+        return $this->success($loanApplications,'Loan Successfully Fetched', 200);
     }
 
     /**
@@ -104,6 +104,8 @@ class LoanApplicationController extends Controller
     public function repaymentInstalmentList(string $loanApplicationNo, string $where = 'all')
     {
         $loanApplications = $this->loanApplicationService->repaymentInstalmentList($loanApplicationNo,$where);  
+        if(!empty($loanApplications['error'])) 
+            return $this->error($loanApplications,401);
         return $this->success($loanApplications,'Successfully Fetched Loan Payment List', 200);
     }
     
