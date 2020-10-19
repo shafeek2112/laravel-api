@@ -24,7 +24,7 @@ class CreateLoanApplicationsTable extends Migration
             $table->decimal('total_repaid_loan_amount', 8, 2)->nullable();
             $table->string('approved_status',10);
             $table->date('application_date');
-            $table->string('current_payment_status',5);
+            $table->string('current_payment_status',5)->nullable();
             $table->timestamps();
 
             $table->softDeletes();

@@ -24,7 +24,7 @@ class AdminActionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return JSON Repsonse
      */
-    public function userApproveReject(Request $request): String    
+    public function userApproveReject(Request $request)    
     {
         $adminActionService = $this->adminActionService->userApproveReject($request);
 
@@ -42,7 +42,7 @@ class AdminActionController extends Controller
      * @param  int  $loanApplicationNo
      * @return \Illuminate\Http\Response
      */
-    public function loanApproveReject(Request $request, $loanApplicationNo): String
+    public function loanApproveReject(Request $request, $loanApplicationNo)
     {
         $adminActionService = $this->adminActionService->loanApproveReject($request, $loanApplicationNo);
         if(!empty($adminActionService['error'])) 
