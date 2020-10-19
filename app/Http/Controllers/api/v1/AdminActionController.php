@@ -42,7 +42,7 @@ class AdminActionController extends Controller
      * @param  int  $loanApplicationNo
      * @return \Illuminate\Http\Response
      */
-    public function loanApproveReject(Request $request, $loanApplicationNo)
+    public function loanApproveReject(Request $request, string $loanApplicationNo)
     {
         $adminActionService = $this->adminActionService->loanApproveReject($request, $loanApplicationNo);
         if(!empty($adminActionService['error'])) 

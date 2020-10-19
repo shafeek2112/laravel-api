@@ -51,7 +51,7 @@ class LoanApplicationController extends Controller
      * @param  string  $loanApplicationNo
      * @return JSON Repsonse
      */
-    public function show($loanApplicationNo)
+    public function show(string $loanApplicationNo)
     {
         $loanApplications = $this->loanApplicationService->findByApplicationNo($loanApplicationNo); 
 
@@ -68,7 +68,7 @@ class LoanApplicationController extends Controller
      * @param  int  $loanApplicationNo
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $loanApplicationNo)
+    public function update(Request $request, string $loanApplicationNo)
     {
         $loanApplications = $this->loanApplicationService->update($request, $loanApplicationNo);  
 
