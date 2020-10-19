@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Enums\UserStatus;
+use App\Enums\UserIsAdmin;
 use App\Models\User;
 use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Config;
@@ -32,9 +33,10 @@ class AuthService
         $data = $request->all();
 
         $validator = Validator::make($data, [
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|confirmed'
+            'name'      => 'required|string',
+            'email'     => 'required|string|email|unique:users',
+            'password'  => 'required|string|confirmed',
+            'is_admin'  => 'in:'.UserIsAdmin::USER_IS_ADMIN.','.UserIsAdmin::USER_IS_ADMIN,
         ]);
 
         if($validator->fails())

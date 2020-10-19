@@ -35,12 +35,6 @@ class AuthController extends Controller
             return $this->error($register,401);
 
         return $this->success($register,'User Successfully Registered', 200);
-        // return response([
-		// 	'status'	=> 'Success', 
-		// 	'message' 	=> 'User Successfully Registered', 
-		// 	'data' 		=> $register,
-		// 	'code'		=> 200
-		// ]);
     }
 
     /**
