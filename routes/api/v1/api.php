@@ -25,7 +25,7 @@ Route::group(['prefix' => '/auth', 'namespace' => 'App\Http\Controllers\api\v1']
     Route::post('signup', 'AuthController@register');
   
     Route::group([ 'middleware' => ['auth:api','user.active'] ], function() {
-        Route::get('logout', 'AuthController@logout');
+        Route::post('logout', 'AuthController@logout');
         Route::get('user', 'AuthController@user');
     });
 });
