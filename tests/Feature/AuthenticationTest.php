@@ -231,7 +231,7 @@ class AuthenticationTest extends TestCase
         $token = $response->json()['data']['accessToken'];
 
         $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->json('GET', 'api/v1/auth/logout', [], ['Accept' => 'application/json'])
+            ->json('POST', 'api/v1/auth/logout', [], ['Accept' => 'application/json'])
             ->assertStatus(200)
             ->assertJson([
                 "status"    => "Success",
@@ -249,7 +249,7 @@ class AuthenticationTest extends TestCase
     {
         $token = $response->json()['data']['accessToken'];
         $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->json('GET', 'api/v1/auth/logout', [], ['Accept' => 'application/json'])
+            ->json('POST', 'api/v1/auth/logout', [], ['Accept' => 'application/json'])
             ->assertStatus(401)
             ->assertJson([
                 "message"   => "Unauthenticated.", 
